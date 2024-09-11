@@ -1,0 +1,31 @@
+sudo apt install liborocos-kdl-dev
+sudo apt install ros-noetic-ecl-*
+sudo apt install libusb-dev
+sudo apt install libftdi-dev
+
+source /opt/ros/noetic/setup.bash
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/src
+git clone https://github.com/yujinrobot/kobuki.git
+git clone https://github.com/yujinrobot/yujin_ocs.git
+git clone https://github.com/yujinrobot/kobuki_msgs.git
+git clone https://github.com/yujinrobot/kobuki_core.git
+
+cd yujin_ocs
+mkdir save
+mv yocs_cmd_vel_mux save
+mv yocs_controllers save
+mv yocs_velocity_smoother save
+rm -rf yocs*
+cd save
+mv * ..
+cd .. && rmdir save
+cd ~/catkin_ws/
+rosdep install --from-paths src --ignore-src -r -y
+catkin_make
+
+rosrun kobuki_ftdi create_udev_rules
+source ~/catkin_ws/devel/setup.bash
+
+roslaunch kobuki_node minimal.launch
+roslaunch kobuki_keyop keyop.launch
